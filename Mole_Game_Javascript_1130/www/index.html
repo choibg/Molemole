@@ -1,0 +1,735 @@
+<!doctype html>
+<html>
+<head>
+	<script src="cordova.js"></script>
+    <script src="phonegap.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="sc.js"></script>
+    <meta charset="utf-8"/>
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>Mole Game</title>
+     <style>
+     </style>
+</head>
+    <body>
+        <div id ="content">
+        </div>
+
+        <script>
+            window.addEventListener("touchmove",function(e){
+                e.preventDefault();
+            });
+            sc.init(373, 665,'content')
+            var currentScene = null;
+            var stage_hole_image = Stage1Scene_hole;
+
+            // Scene_time(Intro, Start, Tip)
+            var IntroScene_time = 500;
+            var mole_big_up_time = 1500;
+            var mole_big_down_time = 1500;
+            var create_mole_time = 1/200;
+            var stage_time = 1000*3;
+
+            // first_user
+            var first_user = true;
+
+            // score
+            var minus_score = -77;
+            var plus_score_normal = 100;
+            var plus_score_special = 50;
+
+            // button
+            var start_button_img = sc.load_image('img/button/strat_button.png');
+            var highscore_button_img = sc.load_image('img/button/highscore_button.png');
+            var before_button_img = sc.load_image('img/button/before_button.png');
+            var next_button_img = sc.load_image('img/button/next_button.png');
+
+            // Life
+            var life_img = sc.load_image('img/life.png');
+
+            // Intro_Image
+            var IntroScene_Image1=sc.load_image('img/IntroImage/intro1.png');
+            var IntroScene_Image2=sc.load_image('img/IntroImage/intro2.png');
+            var IntroScene_Image3=sc.load_image('img/IntroImage/intro3.png');
+            var IntroScene_Image4=sc.load_image('img/IntroImage/intro4.png');
+            var IntroScene_Image5=sc.load_image('img/IntroImage/intro5.png');
+            var IntroScene_Image6=sc.load_image('img/IntroImage/intro6.png');
+            var IntroScene_Image7=sc.load_image('img/IntroImage/intro7.png');
+            
+            // start_image_mole_big_array
+            var cactus1 = sc.load_image('img/background/cactus1.png');
+            var cactus2 = sc.load_image('img/background/cactus2.png');
+            var cactus3 = sc.load_image('img/background/cactus3.png');
+            var cactus4 = sc.load_image('img/background/cactus4.png');
+            var cactus5 = sc.load_image('img/background/cactus5.png');
+            var cactus6 = sc.load_image('img/background/cactus6.png');
+            var cactus7 = sc.load_image('img/background/cactus7.png');
+            var tree1 = sc.load_image('img/background/Tree1.png');
+            var tree2 = sc.load_image('img/background/Tree2.png');
+            var tree3 = sc.load_image('img/background/Tree3.png');
+            var tree4 = sc.load_image('img/background/Tree4.png');
+            var tree5 = sc.load_image('img/background/Tree5.png'); 
+
+            var Stage1Scene_background = sc.load_image('img/background/stage1_background.png');
+            var Stage2Scene_background = sc.load_image('img/background/stage2_background.png');
+            var Stage3Scene_background = sc.load_image('img/background/stage3_background.png');
+
+            var StartScene_background= sc.load_image('img/background/start_background.png');
+
+            var array = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
+            var mole_big_normals = [];
+            var mole_big_angrys = [];
+            var mole_big_teases =[];
+            // var drawables = [];
+            for(var i of array){
+                mole_big_normals.push(sc.load_image('img/mole_big_sprite/mole_big_normals/mole_big_normal'+i+'.png'));
+            }
+            for(var i of array){
+                mole_big_angrys.push(sc.load_image('img/mole_big_sprite/mole_big_angry/mole_big_angry'+i+'.png'));
+            }
+            for(var i of array){
+                mole_big_teases.push(sc.load_image('img/mole_big_sprite/mole_big_tease/mole_big_tease'+i+'.png'));
+            }
+
+            // Tip_image
+            var tip_images =[];
+            var tip_images_array = [1,2,3,4,5,6,7];
+            for(var i of tip_images_array){
+                    tip_images.push(sc.load_image('img/tip_image/tip_image'+i+'.png'))
+            };
+
+            // Stage_image
+            var Stage1Scene_hole = sc.load_image('img/hole/stage1_hole.png');
+            var Stage2Scene_hole = sc.load_image('img/hole/stage2_hole.png');
+            var Stage3Scene_hole = sc.load_image('img/hole/stage3_hole.png');
+
+            var mole_moving_img = [];
+            var mole_cap_moving_img = [];
+            var mole_horn_moving_img =[];
+            var mole_tease_moving_img = [];
+            var mole_angry_moving_img = [];
+            var mole_cap_tease_moving_img = [];
+            var mole_horn_tease_moving_img = [];
+            var moving_array = [0,1,2,3,4,5,6,7,8,9,10]
+
+            for(var i of moving_array){
+                mole_moving_img.push(sc.load_image('img/mole_sprite/mole_normal/mole_sprite'+i+'.png'))
+                mole_cap_moving_img.push(sc.load_image('img/mole_sprite/mole_cap/mole_cap_sprite'+i+'.png'))
+                mole_horn_moving_img.push(sc.load_image('img/mole_sprite/mole_horn/mole_horn_sprite'+i+'.png'))
+                mole_tease_moving_img.push(sc.load_image('img/mole_sprite/mole_tease/mole_tease_sprite'+i+'.png'))
+                mole_angry_moving_img.push(sc.load_image('img/mole_sprite/mole_angry/mole_angry_sprite'+i+'.png'))
+                mole_cap_tease_moving_img.push(sc.load_image('img/mole_sprite/mole_cap_tease/mole_cap_tease_sprite'+i+'.png'))
+                mole_horn_tease_moving_img.push(sc.load_image('img/mole_sprite/mole_horn_tease/mole_horn_tease_sprite'+i+'.png'))
+            }
+
+        /*IntroScene*/
+        class IntroScene1{
+            constructor(){
+                setTimeout(function(){
+                    currentScene = new IntroScene2()
+                },IntroScene_time)
+            }
+            draw(){
+                sc.draw_image(0,0,IntroScene_Image1)
+            }
+        }
+
+        class IntroScene2{
+            constructor(){
+                setTimeout(function(){
+                    currentScene = new IntroScene3()
+                },IntroScene_time)
+            }
+            draw(){
+                sc.draw_image(0,0,IntroScene_Image2)
+            }
+        }
+
+        class IntroScene3{
+            constructor(){
+                setTimeout(function(){
+                    currentScene = new IntroScene4()
+                },IntroScene_time)
+            }
+            draw(){
+                sc.draw_image(0,0,IntroScene_Image3)
+            }
+        }
+            
+        class IntroScene4{
+            constructor(){
+                setTimeout(function(){
+                    currentScene = new IntroScene5()
+                },IntroScene_time)
+            }
+            draw(){
+                sc.draw_image(0,0,IntroScene_Image4)
+            }
+        }
+
+        class IntroScene5{
+            constructor(){
+                setTimeout(function(){
+                    currentScene = new IntroScene6()
+                },IntroScene_time)
+            }
+            draw(){
+                sc.draw_image(0,0,IntroScene_Image5)
+            }
+        }
+
+        class IntroScene6{
+            constructor(){
+                setTimeout(function(){
+                    currentScene = new IntroScene7()
+                },IntroScene_time)
+            }
+            draw(){
+                sc.draw_image(0,0,IntroScene_Image6)
+            }
+        }
+
+        class IntroScene7{
+            constructor(){
+                setTimeout(function(){
+                    currentScene = new startScene()
+                },IntroScene_time)
+            }
+            draw(){
+                sc.draw_image(0,0,IntroScene_Image7)
+            }
+        }
+
+        /*StartScene*/
+        class startScene{
+            constructor(){
+                this.mole_y = 180
+                this.state = "up"
+                this.state_time = (new Date).getTime()
+                this.sprite_index = 0;
+                this.mole_current_face = mole_big_normals;
+            }
+
+            draw(){
+                sc.draw_image(0,0,StartScene_background)
+                sc.draw_image(110,this.mole_y,this.mole_current_face[this.sprite_index])
+                var mole_big_list = [mole_big_normals, mole_big_angrys, mole_big_teases];
+                // console.log(this.state)
+                if(this.state == "up"){
+                    if((new Date).getTime()-this.state_time > mole_big_up_time){
+                        this.state = "godown"
+                        this.state_time = (new Date).getTime()
+                        var random_choice = Math.floor(Math.random()*3);
+                        this.mole_current_face = mole_big_list[random_choice]
+                    }
+                }
+                else if(this.state=="godown"){
+                    if(this.sprite_index < 21){
+                        this.sprite_index +=1;}
+                    if((new Date).getTime()-this.state_time > mole_big_down_time){
+                            this.state = "down"
+                            this.state_time = (new Date).getTime()
+                    }
+                    
+                }
+                else if(this.state=="down"){
+                        this.state = "goup"
+                        this.state_time = (new Date).getTime()
+                        this.mole_current_face = mole_big_normals
+
+                }
+                else if(this.state=="goup"){
+                    if(this.sprite_index > 0){
+                        this.sprite_index -=1;
+                    }
+                    if((new Date).getTime()-this.state_time > mole_big_down_time){
+                            this.state = "up"
+                            this.state_time = (new Date).getTime()
+                    }
+                }
+                sc.draw_image(33,487,start_button_img)
+                sc.draw_image(193,487,highscore_button_img)
+            }
+
+            // first_user가 true이면, Tip화면으로 넘어간다. 
+            touch(x,y){
+                if(x>=33 && x<=200+33 &&  y >= 487 && y<= 537){
+                    if(first_user){
+                        currentScene = new TipScene();
+                    }
+                    else{
+                        currentScene = new Stage1Scene();
+                    }
+                }
+                if(x >= 193&& x <= 200+193&&y >= 487 &&y <= 537){  
+                    currentScene = new HighscoreScene(-1, -1)
+                }
+            }
+        }
+        
+        
+        
+        // Tip에 애미메이션 넣기를 시도해 본다?
+        class TipScene{
+            constructor(){
+                this.tip_index = 0;
+                this.tip_images = tip_images; 
+            }
+
+            draw(){
+                sc.draw_image(33,487,before_button_img)
+                sc.draw_image(193,487,next_button_img)
+                sc.draw_image(0,0,this.tip_images[this.tip_index])
+            }
+
+            touch(x,y){
+                if(x>=33 && x<=200+33 &&  y >= 487 && y<= 537){
+                    if(this.tip_index!=0){this.tip_index -= 1; }
+                    else{this.tip_index =0;}
+                }
+                if(x >= 193&& x <= 200+193&&y >= 487 &&y <= 537){
+                    if(this.tip_index<7){
+                    this.tip_index += 1; }
+                    if(this.tip_index==7){
+                        currentScene = new Stage1Scene();}
+                }
+            }
+        }
+        
+
+        class img_src{
+            constructor(x,y,img){
+                this.x = x; 
+                this.y = y;
+                this.img = img;
+            }
+            draw(){
+                sc.draw_image(this.x,this.y,this.img)
+            }
+        }
+
+        class LifeIndicator{
+            constructor(start_life=3){
+                this.life = start_life; 
+            }
+            ouch(){
+                this.life -= 1;
+
+                if(this.life==0){
+                    currentScene = new GameoverScene;
+                }
+            }
+            draw(){
+                var life_arrays =[];
+                for(i=0; i<this.life; i++){
+                    life_arrays.push(i);
+                }
+                for(var i of life_arrays){
+                    sc.draw_image(20+i*35, 590, life_img)
+                }
+            }
+        }
+
+        class ScoreIndicator{
+            constructor(score=500){
+                this.score = score;
+            }
+            changescore(x){
+                this.score += x 
+                if(this.score<0){
+                    currentScene = new GameoverScene;
+                }
+            }
+            draw(){
+                sc.text(127+1,76+1,"Score","bold 45",[0,0,0])
+                sc.text(142+1,122+1,this.score,"bold 45",[0,0,0])
+                sc.text(127,76,"Score","bold 45",[0xF8,0xE7,0x1C])
+                sc.text(142,122,this.score,"bold 45",[0xF8,0xE7,0x1C])
+            }
+        }
+
+        class Hole{
+            constructor(x,y){
+                this.x = x;
+                this.y = y;
+                this.up = false; 
+                this.sprite_index = 0; 
+                this.random_choice = mole_moving_img;
+            }
+            setcallback(func){
+                this.button = func;
+            }
+            draw(){
+                if(this.up){
+                    if(this.sprite_index<10){
+                         this.sprite_index += 1;
+                    }
+
+                }
+                else if(this.up ==false){
+                    if(this.sprite_index>0){
+                        this.sprite_index -= 1;
+                    }
+                    else{
+                        this.random_choice = mole_moving_img;
+                    }
+                }
+                sc.draw_image(this.x-10, this.y,stage_hole_image)
+                sc.draw_image(this.x+36-this.random_choice[this.sprite_index].width/2,this.y+30-this.random_choice[this.sprite_index].height,this.random_choice[this.sprite_index])
+                // consle.log(ran)
+            }
+
+            randomly_create_mole(){
+                if(this.up == false && Math.random()<create_mole_time){
+                    this.up = true;
+                    var _this = this
+                    this.escapeTimerKey = setTimeout(function(){
+                    	this.up = false
+                        
+                    	if(this.random_choice != mole_horn_moving_img){
+                    		_this.button(-77);
+                    	   if(this.random_choice == mole_moving_img){
+                                this.random_choice = mole_tease_moving_img}
+                    	   else if(this.random_choice == mole_cap_moving_img){
+                    		this.random_choice = mole_cap_tease_moving_img
+                    	   }
+                    	}
+                    	else{this.random_choice = mole_horn_tease_moving_img}
+                    }
+                ,1200+Math.random()*800)
+                   var img = [mole_moving_img, mole_moving_img,mole_moving_img, mole_cap_moving_img, mole_horn_moving_img]
+                   this.sprite_index = 0; 
+                   this.random_choice =  img[Math.floor(Math.random()*5)]
+                }
+            }
+
+            kill(){
+            	if(this.up == true){
+            		this.up = false
+            		clearTimeout(this.escapeTimerKey)
+            		if(this.random_choice == mole_moving_img){
+            			this.button(plus_score_normal)
+            			this.random_choice = mole_angry_moving_img
+            			return "nice"
+            		}
+            		else if(this.random_choice==mole_horn_moving_img){
+            			return "ouch"
+            		}
+            		else if(this.random_choice == mole_cap_moving_img){
+            			this.random_choice = mole_moving_img
+            			this.up = true 
+            			this.button(plus_score_special)
+            			return "nice"
+            		}
+            	}
+            	else{
+            			return "nice"
+            		}
+            }
+
+            touch(x,y){
+            	if (x>=this.x+36 - this.random_choice[this.sprite_index].width/2 && x<=this.x+36-this.random_choice[this.sprite_index].width/2+100 && y>=this.y+32 - this.random_choice[this.sprite_index].height && y<=this.y+32 -this.random_choice[this.sprite_index].height+100){
+            		return this.kill();
+            	}
+            	else{return 'nice'}
+
+            }
+        }
+
+        class Stage1Scene{
+            constructor(){
+                this.currenttime = (new Date).getTime();
+                setTimeout(function(){
+                	if(currentScene instanceof Stage1Scene){
+                		currentScene = new Stage2Scene(this.life,this.score)
+                	}
+                },stage_time)
+
+                stage_hole_image = Stage1Scene_hole; 
+                this.imgs = [new img_src(65,604,cactus1),new img_src(205,545,cactus2), new img_src(-16,400,cactus3), new img_src(255,383,cactus4), new img_src(205,283,cactus5), new img_src(-1,144,cactus6), new img_src(285,144,cactus7)]
+                this.holes = [new Hole(31,272), new Hole(254,272),new Hole(143,402),new Hole(31,522), new Hole(254,522)]
+
+                var drawables = [];
+                this.drawables = drawables; 
+                for(var c of this.imgs){
+                    drawables.push(c)
+                }
+                for(var h of this.holes){
+                    drawables.push(h)
+                }
+
+                this.drawables.sort(function(l,r){
+
+                    if(l.y+l.height < r.y+r.height){
+                        return -1;
+                    }
+                    if(l.y+l.height > r.y+r.height){
+                        return 1;
+                    }
+                    return 0;
+                });
+                this.score = new ScoreIndicator;
+                
+                // notunderstand
+                var _this = this;
+                for(var hole of this.holes){
+
+
+                    hole.setcallback(
+                        function(delta){
+                        return _this.score.changescore(delta);
+                    }
+                    );
+                }
+
+                this.life = new LifeIndicator;
+            }
+            draw(){
+                sc.draw_image(0,0,Stage1Scene_background)
+                for(var a of this.drawables){
+                    a.draw();
+                }
+
+                this.life.draw()
+                for(var hole of this.holes){
+                	hole.randomly_create_mole()
+                }
+
+                this.score.draw() 
+
+                sc.putrectangle(18,632,340,6,[255,255,255])
+
+                var time_arrays = [];
+
+                for(var i=0; i<stage_time/100; i++){
+                    time_arrays.push(i);
+                }
+                for(var i of time_arrays){
+                    if((new Date).getTime() - this.currenttime >= i*100){
+                        sc.putrectangle(18,632,i*1,6,[208,2,27])
+                    }
+                }
+            }
+
+            touch(x,y){
+            	for(var hole of this.holes){
+            		var ret=hole.touch(x,y)
+            		if(ret=='ouch'){
+            			this.life.ouch();
+            		}
+            	}
+            }
+        }
+        class Stage2Scene{
+            constructor(life,score){
+                this.currenttime = (new Date).getTime();
+                setTimeout(function(){
+                    if(currentScene instanceof Stage2Scene){
+                        currentScene = new Stage3Scene
+                    }
+                },stage_time)
+
+                stage_hole_image = Stage2Scene_hole; 
+                this.imgs = [new img_src(-38,506,tree1),new img_src(279,496,tree2), new img_src(221,372,tree3), new img_src(25,120,tree4), new img_src(320,150,tree5)]
+                this.holes = [new Hole(81,272), new Hole(204,272),new Hole(31,402),new Hole(143,402), new Hole(254,402),new Hole(81,522), new Hole(204,522)]
+
+                // var drawables = [];
+                // this.drawables = drawables; 
+                // for(var c of this.imgs){
+                //     drawables.push(c)
+                // }
+                // for(var h of this.holes){
+                //     drawables.push(h)
+                // }
+
+                // this.drawables.sort(function(l,r){
+
+                //     if(l.y+l.height < r.y+r.height){
+                //         return -1;
+                //     }
+                //     if(l.y+l.height > r.y+r.height){
+                //         return 1;
+                //     }
+                //     return 0;
+                // });
+                this.score = new ScoreIndicator;
+                
+                // notunderstand
+                var _this = this;
+                for(var hole of this.holes){
+
+
+                    hole.setcallback(
+                        function(delta){
+                        return _this.score.changescore(delta);
+                    }
+                    );
+                }
+
+                this.life = new LifeIndicator;
+            }
+            draw(){
+                sc.draw_image(0,0,Stage2Scene_background)
+                // for(var a of this.drawables){
+                //     a.draw();
+                // }
+                for(var b of this.holes){
+                    b.draw();
+                }
+                for(var a of this.imgs){
+                    a.draw();
+                }
+
+
+                this.life.draw()
+                for(var hole of this.holes){
+                    hole.randomly_create_mole()
+                }
+
+                this.score.draw() 
+
+                sc.putrectangle(18,632,340,6,[255,255,255])
+
+                var time_arrays = [];
+
+                for(var i=0; i<stage_time/100; i++){
+                    time_arrays.push(i);
+                }
+                for(var i of time_arrays){
+                    if((new Date).getTime() - this.currenttime >= i*100){
+                        sc.putrectangle(18,632,i*1,6,[208,2,27])
+                    }
+                }
+            }
+
+            touch(x,y){
+                for(var hole of this.holes){
+                    var ret=hole.touch(x,y)
+                    if(ret=='ouch'){
+                        this.life.ouch();
+                    }
+                }
+            }
+
+        }
+        class Stage3Scene{
+            constructor(life,score){
+                this.currenttime = (new Date).getTime();
+                setTimeout(function(){
+                    if(currentScene instanceof Stage3Scene){
+                        currentScene = new Stage1Scene
+                    }
+                },stage_time)
+
+                stage_hole_image = Stage3Scene_hole; 
+                // this.imgs = [new img_src(-38,506,tree1),new img_src(279,496,tree2), new img_src(221,372,tree3), new img_src(25,120,tree4), new img_src(320,150,tree5)]
+                this.holes = [new Hole(31,272), new Hole(143,272),new Hole(254,272),new Hole(31,402),new Hole(143,402),new Hole(254,402), new Hole(31,522),new Hole(143,522), new Hole(254,522)]
+
+                // var drawables = [];
+                // this.drawables = drawables; 
+                // for(var c of this.imgs){
+                //     drawables.push(c)
+                // }
+                // for(var h of this.holes){
+                //     drawables.push(h)
+                // }
+
+                // this.drawables.sort(function(l,r){
+
+                //     if(l.y+l.height < r.y+r.height){
+                //         return -1;
+                //     }
+                //     if(l.y+l.height > r.y+r.height){
+                //         return 1;
+                //     }
+                //     return 0;
+                // });
+                this.score = new ScoreIndicator;
+                
+                // notunderstand
+                var _this = this;
+                for(var hole of this.holes){
+
+
+                    hole.setcallback(
+                        function(delta){
+                        return _this.score.changescore(delta);
+                    }
+                    );
+                }
+
+                this.life = new LifeIndicator;
+            }
+            draw(){
+                sc.draw_image(0,0,Stage3Scene_background)
+                for(var b of this.holes){
+                    b.draw();
+                }
+                
+
+
+                this.life.draw()
+                for(var hole of this.holes){
+                    hole.randomly_create_mole()
+                }
+
+                this.score.draw() 
+
+                sc.putrectangle(18,632,340,6,[255,255,255])
+
+                var time_arrays = [];
+
+                for(var i=0; i<stage_time/100; i++){
+                    time_arrays.push(i);
+                }
+                for(var i of time_arrays){
+                    if((new Date).getTime() - this.currenttime >= i*100){
+                        sc.putrectangle(18,632,i*1,6,[208,2,27])
+                    }
+                }
+
+            }
+            touch(){
+                for(var hole of this.holes){
+                    var ret=hole.touch(x,y)
+                    if(ret=='ouch'){
+                        this.life.ouch();
+                    }
+                }
+
+            }
+        }
+
+        class GameoverScene{
+            constructor(){
+
+            }
+            draw(){
+                sc.text(30,70,"GameOVER",30,[0,0,0])
+            }
+        }
+
+        // first_user=true인지를 알아보아야 한다.
+        if(first_user==true){
+            currentScene = new IntroScene1;
+        };
+        // currentScene = new Stage1Scene;
+        onFrame =function(){
+            sc.clear();
+            currentScene.draw();
+        }
+        // sc.on("touchstart", function(e){});
+        // sc.on("touchmove", function(e){});
+        sc.on("touchend", function(e){
+            x =e.changedTouches[0].pageX;
+            y = e.changedTouches[0].pageY;  
+            currentScene.touch(x,y);
+            });
+        sc.mainloop(onFrame);
+
+        </script>
+    </body>
+</html>
