@@ -1,0 +1,552 @@
+<!doctype html>
+<html>
+<head>
+	<script src="cordova.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="sc.js"></script>
+     <script src="coffee-script.js"></script>
+<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+     <style>
+     body {
+     	margin:0;
+     	padding:0;
+     	border:0;
+     }
+     </style>
+</head>
+<body>
+
+<div id ="content">
+
+</div>
+<script type="text/coffeescript">	
+$(document).ready ->
+	window.addEventListener('touchmove', 
+		(e)-> 
+			e.preventDefault()
+	,false)
+#======================Screen======================# 
+sc.init(373, 665, 'content')
+
+#======================image upload======================#
+
+#----------------------StartScene----------------------#
+mole_normal_big = sc.load_image('img/mole_big/Mole_normal_big.png')
+mole_cap_img_big = sc.load_image('img/mole_big/Mole_cap_big.png')
+mole_horn_big = sc.load_image('img/mole_big/Mole_horn_big.png')
+mole_tease_big = sc.load_image('img/mole_big/Mole_tease_big.png')
+mole_angry_big = sc.load_image('img/mole_big/Mole_angry_big.png')
+start_button_img = sc.load_image('img/button/strat_button.png')
+gameover_background = sc.load_image('img/background/gameover_background.png')
+highscore_button_img = sc.load_image('img/button/highscore_button.png')
+help_button_img = sc.load_image('img/button/Help_button.png')
+StartScene_background= sc.load_image('img/background/start_background.png')
+StartScene_background2= sc.load_image('img/background/start_background2.png')
+
+#----------------------Stage1Scene----------------------#
+mole_moving_img = []
+mole_cap_moving_img = []
+mole_horn_moving_img =[]
+mole_tease_moving_img = []
+mole_angry_moving_img = []
+mole_cap_tease_moving_img = []
+mole_horn_tease_moving_img = []
+
+for i in [11..1]
+	mole_moving_img.push(sc.load_image('img/mole_sprite/mole_normal/mole_sprite'+i+'.png'))
+	mole_cap_moving_img.push(sc.load_image('img/mole_sprite/mole_cap/mole_cap_sprite'+i+'.png'))
+	mole_horn_moving_img.push(sc.load_image('img/mole_sprite/mole_horn/mole_horn_sprite'+i+'.png'))
+	mole_tease_moving_img.push(sc.load_image('img/mole_sprite/mole_tease/mole_tease_sprite'+i+'.png'))
+	mole_angry_moving_img.push(sc.load_image('img/mole_sprite/mole_angry/mole_angry_sprite'+i+'.png'))
+	mole_cap_tease_moving_img.push(sc.load_image('img/mole_sprite/mole_cap_tease/mole_cap_tease_sprite'+i+'.png'))
+	mole_horn_tease_moving_img.push(sc.load_image('img/mole_sprite/mole_horn_tease/mole_horn_tease_sprite'+i+'.png'))
+
+Stage1Scene_background = sc.load_image('img/background/stage1_background.png')
+Stage1Scene_hole = sc.load_image('img/hole/stage1_hole.png')
+Stage2Scene_hole = sc.load_image('img/hole/stage2_hole.png')
+Stage3Scene_hole = sc.load_image('img/hole/stage3_hole.png')
+stage_hole_image = Stage1Scene_hole
+
+
+cactus1 = sc.load_image('img/background/cactus1.png')
+cactus2 = sc.load_image('img/background/cactus2.png')
+cactus3 = sc.load_image('img/background/cactus3.png')
+cactus4 = sc.load_image('img/background/cactus4.png')
+cactus5 = sc.load_image('img/background/cactus5.png')
+cactus6 = sc.load_image('img/background/cactus6.png')
+cactus7 = sc.load_image('img/background/cactus7.png')
+
+tree1 = sc.load_image('img/background/Tree1.png')
+tree2 = sc.load_image('img/background/Tree2.png')
+tree3 = sc.load_image('img/background/Tree3.png')
+tree4 = sc.load_image('img/background/Tree4.png')
+tree5 = sc.load_image('img/background/Tree5.png')
+
+
+
+
+life_img = sc.load_image('img/life.png')
+
+#----------------------Between12_background----------------------#
+Between12_background = sc.load_image('img/background/Between12_background.png')
+Between12_background2 = sc.load_image('img/background/Between12_background2.png')
+
+#----------------------Stage2Scene----------------------#
+Stage2Scene_background = sc.load_image('img/background/stage2_background.png')
+
+#----------------------Between23_background----------------------#
+Between23_background = sc.load_image('img/background/Between23_background.png')
+Between23_background2 = sc.load_image('img/background/Between23_background2.png')
+
+#----------------------Stage3Scene----------------------#
+Stage3Scene_background = sc.load_image('img/background/stage3_background.png')
+
+
+#======================Variable======================#
+currentScene = null
+#score 
+minus_score = -77
+plus_score_normal = 100
+plus_score_special = 50
+
+#game time 
+creat_mole_time = 1/200
+mole_big_up_time = 1000
+mole_big_down_time = 1000
+stage_time =1000*30
+between_time = 1000*20
+#======================Making Class======================#
+class Cactus 
+	constructor : (@x,@y,@img) ->
+	draw : ->
+		sc.draw_image(@x,@y,@img) 
+class Hole 
+	constructor : (x,y) ->
+		@x = x 
+		@y = y 
+		@up = false 
+		@sprite_index = 0
+		@random_choice = mole_moving_img
+	setcallback:(func)->
+		@button = func
+	draw : -> 
+		if @up
+			if @sprite_index < 10 
+				@sprite_index = @sprite_index + 1 
+		else if @up == false 
+			if @sprite_index > 0
+				@sprite_index = @sprite_index - 1
+			else
+				@random_choice =  mole_moving_img
+		sc.draw_image(@x-10, @y,stage_hole_image)
+		sc.draw_image(@x+36-@random_choice[@sprite_index].width/2,@y+30-@random_choice[@sprite_index].height,@random_choice[@sprite_index])
+	randomly_create_mole: ->
+		if @up == false and Math.random() < creat_mole_time
+			@up = true 
+			@escapeTimerKey = setTimeout(=> 
+				@up = false
+				if @random_choice != mole_horn_moving_img
+					@button(-77)
+					if @random_choice == mole_moving_img 
+						@random_choice = mole_tease_moving_img 
+					else if @random_choice == mole_cap_moving_img
+						@random_choice = mole_cap_tease_moving_img
+				else 
+					@random_choice = mole_horn_tease_moving_img
+
+
+			, 1200+Math.random()*800)
+			img = [mole_moving_img, mole_moving_img,mole_moving_img, mole_cap_moving_img, mole_horn_moving_img]
+			@sprite_index = 0
+			@random_choice = img[Math.floor(Math.random()*5)]
+
+	kill : ->
+		if @up == true 
+			@up = false 
+			clearTimeout(@escapeTimerKey)
+			if @random_choice == mole_moving_img
+				@button(plus_score_normal)
+				@random_choice = mole_angry_moving_img
+				return "nice" 
+			else if @random_choice == mole_horn_moving_img 
+				return "ouch"
+			else if @random_choice == mole_cap_moving_img 
+				@random_choice = mole_moving_img
+				@up = true 
+				@button(plus_score_special)
+
+				return "nice"
+		else 
+			return "nice"
+
+	touch : (x,y)-> 
+		if x>=@x+36-@random_choice[@sprite_index].width/2 and x<=@x+36-@random_choice[@sprite_index].width/2+100 and y>=@y+32-@random_choice[@sprite_index].height and y<=@y+32-@random_choice[@sprite_index].height+100
+			return @kill() 
+		else 
+			return 'nice'
+
+class ScoreIndicator 
+	constructor :(score=5000)-> 
+		@score = score
+
+	changescore :(x)-> 
+		@score = @score + x 
+		if @score < 0
+			currentScene = new GameoverScene
+
+	draw : ->
+		sc.text(127+1,76+1,"Score","bold 45",[0,0,0])
+		sc.text(142+1,122+1,@score,"bold 45",[0,0,0])
+		sc.text(127,76,"Score","bold 45",[0xF8,0xE7,0x1C])
+		sc.text(142,122,@score,"bold 45",[0xF8,0xE7,0x1C])
+
+class LifeIndicator 
+	constructor:(start_life=3)-> 
+		@life = start_life 
+
+	ouch :-> 
+		@life = @life-1
+		if @life == 0
+			currentScene = new GameoverScene
+
+	draw:->
+		for i in [0...@life]
+		#	sc.putrectangle(100+i*50,600,30,30,[255,0,0])
+			sc.draw_image(18+i*50,590,life_img)
+
+##### ###### ###### #   # #####
+#     #      #      ##  # #
+##### #      ###### # # # #####
+    # #      #      #  ## #
+##### ###### ###### #   # #####
+#======================Scene======================#
+class StartScene
+	constructor: ->
+		@min_mole_y = 240
+		@max_mole_y = 390
+		@mole_y = 240
+		@state = "up"
+		@state_time = (new Date).getTime()
+		@mole_current_face = mole_normal_big
+		# "up", "down", "goup", "godown"
+	draw:->
+		sc.draw_image(0,0,StartScene_background)
+		mole_face_list = [mole_angry_big, mole_tease_big, mole_normal_big]
+		sc.draw_image(110,@mole_y,@mole_current_face)
+		if @state == "up"
+			if (new Date).getTime() - @state_time > mole_big_up_time
+				@state = "godown"
+				@state_time = (new Date).getTime()
+				random_choice = Math.floor(Math.random()*3)
+				@mole_current_face = mole_face_list[random_choice]
+		else if @state == "godown"
+			@mole_y = @mole_y + 5 
+			if @mole_y >= @max_mole_y
+				@state = "down"
+				@state_time = (new Date).getTime() 
+		else if @state == "down"
+			if (new Date).getTime() - @state_time > mole_big_down_time
+				@state = "goup"
+				@state_time = (new Date).getTime()
+				@mole_current_face = mole_normal_big
+		else if @state == "goup"
+			@mole_y = @mole_y - 10 
+			if @mole_y <= @min_mole_y 
+				@state = "up"
+				@state_time = (new Date).getTime()
+		sc.draw_image(0,402,StartScene_background2)
+		sc.draw_image(33,487,start_button_img)
+		sc.draw_image(193,487,highscore_button_img)
+
+	touch:(x,y)->
+		if x >= 33 and x <= 200+33 and y >= 487 and y <= 537  
+			currentScene = new Stage1Scene()
+		if x >= 193 and x <= 200+193 and y >= 487 and y <= 537  
+			currentScene = new HighscoreScene(-1, -1)
+
+class Stage1Scene
+	constructor : ->
+		@currenttime = (new Date).getTime()
+		setTimeout(=>
+			if (currentScene instanceof Stage1Scene)
+				currentScene = new Between12Scene(@life.life,@score.score)
+		,stage_time)
+		stage_hole_image = Stage1Scene_hole
+		@cactus = [new Cactus(65,604,cactus1),new Cactus(205,545,cactus2), new Cactus(-25,500,cactus3), new Cactus(255,383,cactus4), new Cactus(205,283,cactus5), new Cactus(-1,144,cactus6), new Cactus(285,144,cactus7)]
+		@holes = [new Hole(31,272), new Hole(254,272),new Hole(143,402),new Hole(31,522), new Hole(254,522)]
+		@drawables = []
+		for c in @cactus
+			@drawables.push(c)
+		for h in @holes
+			@drawables.push(h)
+		@drawables.sort((l,r)->
+				if l.y < r.y
+					return -1
+				if l.y > r.y
+					return 1
+				return 0
+			)
+		@score = new ScoreIndicator
+		for hole in @holes 
+			hole.setcallback((delta)=>
+				@score.changescore(delta)
+			)
+		@life = new LifeIndicator
+
+
+	draw: ->
+		sc.draw_image(0,0,Stage1Scene_background)
+		for a in @drawables
+			a.draw()
+		@life.draw()
+		for hole in @holes
+			hole.randomly_create_mole()	
+
+		@score.draw()
+		sc.putrectangle(18,632,340,6,[255,255,255])
+		for i in [0..(stage_time/100)]
+			if (new Date).getTime()-@currenttime >= i*100
+				sc.putrectangle(18,632,i*1,6,[208,2,27])
+	touch: (x, y) ->
+		for hole in @holes
+			ret = hole.touch(x,y)
+			if ret == 'ouch'
+				@life.ouch()
+
+class Stage2Scene 
+	constructor : (life,score)->
+		@currenttime = (new Date).getTime()
+		setTimeout(=>
+			if (currentScene instanceof Stage2Scene)
+				currentScene = new Between23Scene(@life.life,@score.score)
+
+		,stage_time)
+		
+		stage_hole_image = Stage2Scene_hole
+		@cactus = [new Cactus(-38,506,tree1),new Cactus(279,496,tree2), new Cactus(221,292,tree3), new Cactus(25,157,tree4), new Cactus(320,140,tree5)]
+		@holes = [new Hole(81,272), new Hole(204,272),new Hole(31,402),new Hole(143,402), new Hole(254,402),new Hole(81,522), new Hole(204,522)]
+		@drawables = []
+		for c in @cactus
+			@drawables.push(c)
+		for h in @holes
+			@drawables.push(h)
+		@drawables.sort((l,r)->
+				if l.y < r.y
+					return -1
+				if l.y > r.y
+					return 1
+				return 0
+			)
+		@score = new ScoreIndicator(score)
+		for hole in @holes 
+			hole.setcallback((delta)=>
+				@score.changescore(delta)
+			)
+		@life = new LifeIndicator(life)
+	draw: ->
+		sc.draw_image(0,0,Stage2Scene_background)
+		for a in @drawables
+			a.draw()
+		@life.draw()
+		for hole in @holes
+			hole.randomly_create_mole()	
+
+		@score.draw()
+		sc.putrectangle(18,632,340,6,[255,255,255])
+		for i in [0..(stage_time/100)]
+			if (new Date).getTime()-@currenttime >= i*100
+				sc.putrectangle(18,632,i*1,6,[208,2,27])
+	touch: (x, y) ->
+		for hole in @holes
+			ret = hole.touch(x,y)
+			if ret == 'ouch'
+				@life.ouch()
+
+class Stage3Scene
+	constructor : (life,score)->
+		@currenttime = (new Date).getTime()
+		setTimeout(=>
+			if (currentScene instanceof Stage3Scene)
+				currentScene = new HighscoreScene(@life.life,@score.score)
+		,stage_time)
+		
+		stage_hole_image = Stage3Scene_hole
+		@holes = [new Hole(31,272), new Hole(143,272),new Hole(254,272),new Hole(31,402),new Hole(143,402),new Hole(254,402), new Hole(31,522),new Hole(143,522), new Hole(254,522)]
+		@score = new ScoreIndicator(score)
+		for hole in @holes 
+			hole.setcallback((delta)=>
+				@score.changescore(delta)
+			)
+		@life = new LifeIndicator(life)
+	draw: ->
+		sc.draw_image(0,0,Stage3Scene_background)
+		for i in [0...@holes.length]
+			@holes[i].draw()
+		@life.draw()
+		for hole in @holes
+			hole.randomly_create_mole()	
+
+		@score.draw()
+		sc.putrectangle(18,632,340,6,[255,255,255,0.7])
+		for i in [0..(stage_time/100)]
+			if (new Date).getTime()-@currenttime >= i*100
+				sc.putrectangle(18,632,i*1,6,[208,2,27])
+	touch: (x, y) ->
+		for hole in @holes
+			ret = hole.touch(x,y)
+			if ret == 'ouch'
+				@life.ouch()
+
+class Between12Scene 
+	constructor:(life,score)->
+		setTimeout(->
+			currentScene = new Stage2Scene(life,score)
+		,between_time)
+
+		@min_mole_y = 225
+		@max_mole_y = 375
+		@mole_y = 240
+		@state = "up"
+		@state_time = (new Date).getTime()
+
+	draw:->
+		sc.draw_image(0,0,Between12_background)
+		sc.draw_image(110,@mole_y,mole_normal_big)
+		if @state == "up"
+			if (new Date).getTime() - @state_time > mole_big_up_time
+				@state = "godown"
+				@state_time = (new Date).getTime()
+		else if @state == "godown"
+			@mole_y = @mole_y + 5 
+			if @mole_y >= @max_mole_y
+				@state = "down"
+				@state_time = (new Date).getTime() 
+		else if @state == "down"
+			if (new Date).getTime() - @state_time > mole_big_down_time
+				@state = "goup"
+				@state_time = (new Date).getTime()
+		else if @state == "goup"
+			@mole_y = @mole_y - 10 
+			if @mole_y <= @min_mole_y 
+				@state = "up"
+				@state_time = (new Date).getTime()
+		sc.draw_image(0,392,Between12_background2)
+
+
+class Between23Scene 
+	constructor:(life,score)->
+		setTimeout(->
+			currentScene = new Stage3Scene(life,score)
+		,between_time)
+		@min_mole_y = 225
+		@max_mole_y = 375
+		@mole_y = 240
+		@state = "up"
+		@state_time = (new Date).getTime()
+	draw:->
+		sc.draw_image(0,0,Between23_background)
+		sc.draw_image(110,@mole_y,mole_normal_big)
+		if @state == "up"
+			if (new Date).getTime() - @state_time > mole_big_up_time
+				@state = "godown"
+				@state_time = (new Date).getTime()
+		else if @state == "godown"
+			@mole_y = @mole_y + 5 
+			if @mole_y >= @max_mole_y
+				@state = "down"
+				@state_time = (new Date).getTime() 
+		else if @state == "down"
+			if (new Date).getTime() - @state_time > mole_big_down_time
+				@state = "goup"
+				@state_time = (new Date).getTime()
+		else if @state == "goup"
+			@mole_y = @mole_y - 10 
+			if @mole_y <= @min_mole_y 
+				@state = "up"
+				@state_time = (new Date).getTime()
+		sc.draw_image(0,395,Between23_background2)
+	touch:(x,y)->
+
+
+
+
+class GameoverScene 
+	draw:->
+		sc.text(30,70,"GameoverScene",30,[0,0,0])
+		sc.draw_image(0,0,gameover_background)
+		sc.draw_image(33,308,start_button_img)
+		sc.draw_image(193,308,help_button_img)
+	touch:(x,y)->
+		if x >= 33 and x <= 200+33 and y >= 308 and y <= 308+50  
+			currentScene = new StartScene()
+		if x >= 193 and x <= 200+193 and y >= 308 and y <= 308+50  
+			currentScene = new HelpScene()
+
+class HighscoreScene
+	constructor:(life,score)->
+		@score = score
+		@life = life 
+
+		# score0 ~ score9, name0 ~ name9
+		@scores =[]
+		for i in [0...10]
+			saved_name = localStorage.getItem("name"+i)
+			saved_score = localStorage.getItem("score"+i)
+			if saved_name != null and saved_score != null
+				@scores.push([saved_name, saved_score])
+		if @score == -1
+			return
+		if @scores.length < 10 or @score > @scores[9][1]
+			@name = prompt("Enter your name")
+
+		@scores.push([@name,@score])
+		@scores.sort((l,r)->
+				if l[1] > r[1]
+					return -1
+				if l[1] < r[1]
+					return 1
+				return 0
+			)
+		for i in [0...10]
+			if i < @scores.length
+				localStorage.setItem("name"+i, @scores[i][0])
+				localStorage.setItem("score"+i, @scores[i][1])
+	draw:->
+		sc.text(30,70,"HighscoreScene",30,[0,0,0])
+		sc.draw_image(86,300,start_button_img)
+		for i in [0...@scores.length]
+			sc.text(30, 100+50*i,@scores[i][0], 30, [0,0,0])
+			sc.text(70, 100+50*i,@scores[i][1], 30, [0,0,0])
+
+
+	touch:(x,y)->
+		if x >= 86 and x <= 200+86 and y >= 300 and y <= 350  
+			currentScene = new StartScene()
+
+class HelpScene 
+	draw :->
+		sc.text(30,70,"HelpScene",30,[0,0,0])
+	touch:(x,y)->
+
+
+#======================Touch======================#
+#startup_setting 
+currentScene = new StartScene
+
+onFrame = ->
+	sc.clear()
+	currentScene.draw() 
+
+sc.on "touchstart", (e)->
+sc.on "touchend", (e)->
+	x =e.changedTouches[0].pageX 
+	y = e.changedTouches[0].pageY 
+	currentScene.touch(x,y)
+sc.on "touchmove", (e)->
+sc.mainloop onFrame
+
+
+
+</script>
+</body>
+</html>
